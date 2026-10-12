@@ -1,103 +1,80 @@
-# Guia de Configuração do Projeto Django com Docker
+# BuscarFilmes
 
-Este documento orienta como configurar o ambiente para clonar o repositório via SSH, instalar Docker no Linux e Windows, além de usar Makefiles para facilitar os comandos Docker.
+Aplicação web para buscar filmes, ver detalhes e descobrir onde assistir. Feita com **Django**, consumindo a API do **TMDb** e com busca por descrição usando **IA (Google Gemini)**.
 
----
+Projeto acadêmico feito em grupo na faculdade, entre agosto e outubro de 2025. Ele valeu a nota das duas provas da disciplina (P1 e P2).
 
-## 1. Configurar chave SSH para clonar o repositório
+## Funcionalidades
 
-Para evitar digitar usuário e senha toda vez que usar o Git, configure sua chave SSH.
+- **Busca por título**: resultados ordenados por popularidade, com pôster, sinopse e as plataformas de streaming onde o filme está disponível
+- **Busca por descrição com IA**: o usuário descreve o filme ("aquele em que um homem fica preso em Marte...") e o Gemini identifica o título mais provável antes de buscar no TMDb
+- **Detalhes do filme**: trailer, gêneros, duração, avaliação, elenco, imagens, críticas e recomendações
+- **Listas de filmes**: populares, mais bem avaliados, próximos lançamentos e em cartaz, com botão "Carregar mais" via AJAX
+- **Sobre**: página com a proposta do projeto e a equipe
 
-### 1.1 Verificar se já tem uma chave SSH
+## Tecnologias
 
-Abra o terminal e rode:
+- Python e Django 5
+- [API do TMDb](https://developer.themoviedb.org/) para os dados dos filmes e provedores de streaming
+- Google Gemini (`google-genai`) para a busca por descrição
+- PostgreSQL
+- Docker, Docker Compose e Makefile
 
-ls ~/.ssh/id_rsa.pub
+## Como executar
 
-### 1.2 Gerar uma nova chave SSH
+Pré-requisitos: [Docker](https://docs.docker.com/get-docker/) e Docker Compose, além de uma chave da [API do TMDb](https://www.themoviedb.org/settings/api) e uma do [Google AI Studio](https://aistudio.google.com/apikey).
 
-ssh-keygen -t rsa -b 4096 -C "seu_email@example.com"
+1. Clone o repositório:
 
-### 1.3 Copiar a chave pública
+   ```bash
+   git clone https://github.com/Irlamfernandes/buscar-filmes.git
+   cd buscar-filmes
+   ```
 
-cat ~/.ssh/id_rsa.pub
+2. Crie o arquivo `env_file/.env` com as chaves:
 
-### 1.4 Adicionar a chave no GitHub
+   ```env
+   TMDB_API_KEY=sua_chave_tmdb
+   GEMINI_API_KEY=sua_chave_gemini
+   ```
 
-Acesse GitHub > Settings > SSH and GPG keys
+3. Suba os containers:
 
-Clique em New SSH key
+   ```bash
+   make build
+   make up
+   ```
 
-Cole a chave copiada, dê um nome (ex: “PC do <nome>”) e salve.
+   Sem `make`, use `docker compose up --build`.
 
-### 1.5 Testar conexão SSH
+4. Acesse em [http://localhost:8000](http://localhost:8000).
 
-ssh -T git@github.com
+Outros comandos do Makefile: `make up-detached`, `make down`, `make rebuild` e `make bash`.
 
+## Estrutura
 
-## 2. Instalar Docker
+```
+├── core/                  # configurações do Django (settings, urls)
+├── coreapp/
+│   ├── views.py           # busca, detalhes, filmes populares e sobre
+│   ├── services.py        # cliente da API do TMDb
+│   ├── ia_services.py     # integração com o Google Gemini
+│   └── rotas_streaming.py # links das plataformas de streaming
+├── templates/coreapp/     # páginas HTML
+├── static/                # CSS e imagens
+├── Dockerfile
+├── docker-compose.yml
+└── Makefile
+```
 
-## 2.1 Linux
+## Equipe
 
-### 1. Atualizar pacotes
+O projeto foi organizado com branches e pull requests no GitHub (mais de 40 PRs).
 
-sudo apt update
-
-### 2. Instalar dependências
-
-sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
-
-### 3. Adicionar chave GPG
-
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-
-### 4. Adicionar repositório do Docker
-
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-### 5. Instalar Docker
-
-sudo apt update
-sudo apt install docker-ce docker-ce-cli containerd.io -y
-
-### 6. Permitir uso sem sudo
-
-sudo usermod -aG docker $USER
-
-### 7. Instalar docker-compose
-
-sudo apt install docker-compose -y
-
-### 8. Testar
-
-docker --version
-docker-compose --version
-docker run hello-world
-
-## Windows
-
-### 1. Baixar Docker Desktop
-
-https://www.docker.com/products/docker-desktop
-
-### 2. Instalar
-
-Ative "Use WSL 2 instead of Hyper-V".
-
-Reinicie o computador.
-
-### 3. Abrir Docker Desktop
-
-Aguarde até mostrar "Docker is running".
-
-### 4. Testar
-
-docker --version
-docker-compose --version
-docker run hello-world
-
-# Passo a passo de comandos Git
-
-[Clique aqui](https://chatgpt.com/share/68a51ee8-5ecc-8005-9b90-9f3b7b248f74) para acessar a página que indica os comandos e passo a passo Git que serão utilizados ao longo do projeto.
+- Bruno Almeida da Silva
+- Emanuel Rosa Franco
+- Irlam da Silva Fernandes ([@Irlamfernandes](https://github.com/Irlamfernandes))
+- Josué Luis dos S. P. de Barros
+- Natan Jordão Pedroso
+- Paulo Vitor Leal Lavinas
+- Rafael Ferreira Lima
